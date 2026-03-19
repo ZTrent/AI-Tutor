@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tutor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* API Key Screen */
+        #apiKeyScreen {
+            background: white;
+            width: 480px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        #apiKeyScreen h2 {
+            font-size: 22px;
+            color: #1e293b;
+        }
+
+        #apiKeyScreen p {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        #apiKeyScreen input {
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            font-family: monospace;
+        }
+
+        #apiKeyScreen input:focus {
+            border-color: #4f46e5;
+        }
+
+        #apiKeyScreen button {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        #apiKeyScreen button:hover {
+            background: #4338ca;
+        }
+
+        #keyError {
+            color: #ef4444;
+            font-size: 13px;
+            display: none;
+        }
+
+        /* Chat Screen */
+        #chatScreen {
+            display: none;
+        }
+
+        .chat-container {
+            background: white;
+            width: 700px;
+            height: 600px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: #4f46e5;
+            color: white;
+            padding: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .chat-header button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+
+        .message.tutor {
+            background: #f0f4f8;
+            color: #1e293b;
+            align-self: flex-start;
+        }
+
+        .message.user {
+            background: #4f46e5;
+            color: white;
+            align-self: flex-end;
+        }
+
+        .message.loading {
+            background: #f0f4f8;
+            color: #94a3b8;
+            align-self: flex-start;
+            font-style: italic;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 16px;
+            border-top: 1px solid #e2e8f0;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .chat-input button {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .chat-input button:hover {
+            background: #4338ca;
+        }
+
+        .chat-input button:disabled {
+            background: #a5b4fc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- API Key Entry Screen -->
+    <div id="apiKeyScreen">
+        <h2>🎓 AI Tutor</h2>
+        <p>Enter your Anthropic API key to get started. Your key is never saved and stays only in your browser tab.</p>
+        <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." />
+        <span id="keyError">Please enter a valid API key.</span>
+        <button onclick="startChat()">Start Tutoring</button>
+    </div>
+
+    <!-- Chat Screen -->
+    <div id="chatScreen">
+        <div class="chat-container">
+            <div class="chat-header">
+                <span>🎓 AI Tutor</span>
+                <button onclick="changeKey()">Change Key</button>
+            </div>
+            <div class="chat-messages" id="messages">
+                <div class="message tutor">
+                    Hi! I'm your AI Tutor. What would you like to learn today?
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="userInput" placeholder="Ask me anything..." />
+                <button id="sendBtn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let API_KEY = '';
+        const conversationHistory = [];
+
+        function startChat() {
+            const keyInput = document.getElementById('apiKeyInput').value.trim();
+            if (!keyInput.startsWith('sk-ant-')) {
+                document.getElementById('keyError').style.display = 'block';
+                return;
+            }
+            API_KEY = keyInput;
+            document.getElementById('apiKeyScreen').style.display = 'none';
+            document.getElementById('chatScreen').style.display = 'block';
+            document.getElementById('userInput').focus();
+        }
+
+        function changeKey() {
+            API_KEY = '';
+            document.getElementById('apiKeyInput').value = '';
+            document.getElementById('keyError').style.display = 'none';
+            document.getElementById('chatScreen').style.display = 'none';
+            document.getElementById('apiKeyScreen').style.display = 'flex';
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const messages = document.getElementById('messages');
+            const sendBtn = document.getElementById('sendBtn');
+            const userText = input.value.trim();
+
+            if (!userText) return;
+
+            addMessage(userText, 'user');
+            input.value = '';
+            sendBtn.disabled = true;
+
+            const loadingMsg = addMessage('Tutor is thinking...', 'loading');
+
+            conversationHistory.push({
+                role: 'user',
+                content: userText
+            });
+
+            try {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': API_KEY,
+                        'anthropic-version': '2023-06-01',
+                        'anthropic-dangerous-direct-browser-access': 'true'
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-haiku-4-5-20251001',
+                        max_tokens: 1000,
+                        system: `You are a friendly and patient AI tutor. Your job is to teach concepts clearly and simply.
+                        - Always explain things step by step
+                        - Use simple language and real world analogies
+                        - Ask the student questions to check understanding
+                        - Encourage the student when they get things right
+                        - If they are confused, try a different explanation approach
+                        - Keep responses concise and easy to read`,
+                        messages: conversationHistory
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error?.message || `API error ${response.status}`);
+                }
+
+                const tutorReply = data.content[0].text;
+
+                loadingMsg.remove();
+                addMessage(tutorReply, 'tutor');
+
+                conversationHistory.push({
+                    role: 'assistant',
+                    content: tutorReply
+                });
+
+            } catch (error) {
+                loadingMsg.remove();
+                addMessage(`Error: ${error.message}`, 'tutor');
+            }
+
+            sendBtn.disabled = false;
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function addMessage(text, type) {
+            const messages = document.getElementById('messages');
+            const msg = document.createElement('div');
+            msg.className = `message ${type}`;
+            msg.textContent = text;
+            messages.appendChild(msg);
+            messages.scrollTop = messages.scrollHeight;
+            return msg;
+        }
+
+        document.getElementById('apiKeyInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') startChat();
+        });
+
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && document.getElementById('chatScreen').style.display === 'block') {
+                const activeEl = document.activeElement;
+                if (activeEl && activeEl.id === 'userInput') sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
