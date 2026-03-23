@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Tutor</title>
+    <title>Dropshipping CEO Advisor</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         }
 
         body {
-            background-color: #f0f4f8;
+            background-color: #f0f7f0;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -23,7 +23,7 @@
         /* API Key Screen */
         #apiKeyScreen {
             background: white;
-            width: 480px;
+            width: 500px;
             border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             padding: 40px;
@@ -43,6 +43,37 @@
             line-height: 1.5;
         }
 
+        .persona-badge {
+            background: linear-gradient(135deg, #166534, #15803d);
+            color: white;
+            border-radius: 10px;
+            padding: 14px 18px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .persona-badge strong {
+            font-size: 15px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .topics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-size: 12px;
+            color: #475569;
+        }
+
+        .topic-item {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+            padding: 5px 8px;
+            color: #166534;
+        }
+
         #apiKeyScreen input {
             padding: 12px 16px;
             border: 1px solid #e2e8f0;
@@ -53,11 +84,11 @@
         }
 
         #apiKeyScreen input:focus {
-            border-color: #4f46e5;
+            border-color: #166534;
         }
 
         #apiKeyScreen button {
-            background: #4f46e5;
+            background: #166534;
             color: white;
             border: none;
             padding: 12px;
@@ -67,7 +98,7 @@
         }
 
         #apiKeyScreen button:hover {
-            background: #4338ca;
+            background: #15803d;
         }
 
         #keyError {
@@ -83,8 +114,8 @@
 
         .chat-container {
             background: white;
-            width: 700px;
-            height: 600px;
+            width: 760px;
+            height: 640px;
             border-radius: 16px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             display: flex;
@@ -93,14 +124,23 @@
         }
 
         .chat-header {
-            background: #4f46e5;
+            background: linear-gradient(135deg, #166534, #15803d);
             color: white;
-            padding: 20px;
-            font-size: 20px;
-            font-weight: bold;
+            padding: 18px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+
+        .chat-header-info h1 {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .chat-header-info p {
+            font-size: 12px;
+            opacity: 0.85;
+            margin-top: 2px;
         }
 
         .chat-header button {
@@ -117,6 +157,33 @@
             background: rgba(255,255,255,0.3);
         }
 
+        .quick-topics {
+            display: flex;
+            gap: 8px;
+            padding: 10px 16px;
+            background: #f0fdf4;
+            border-bottom: 1px solid #dcfce7;
+            overflow-x: auto;
+            flex-shrink: 0;
+        }
+
+        .quick-topic-btn {
+            background: white;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .quick-topic-btn:hover {
+            background: #166534;
+            color: white;
+        }
+
         .chat-messages {
             flex: 1;
             padding: 20px;
@@ -129,24 +196,26 @@
         .message {
             padding: 12px 16px;
             border-radius: 12px;
-            max-width: 80%;
-            line-height: 1.5;
+            max-width: 82%;
+            line-height: 1.6;
+            font-size: 14px;
         }
 
-        .message.tutor {
-            background: #f0f4f8;
+        .message.ceo {
+            background: #f0fdf4;
             color: #1e293b;
             align-self: flex-start;
+            border-left: 3px solid #16a34a;
         }
 
         .message.user {
-            background: #4f46e5;
+            background: #166534;
             color: white;
             align-self: flex-end;
         }
 
         .message.loading {
-            background: #f0f4f8;
+            background: #f0fdf4;
             color: #94a3b8;
             align-self: flex-start;
             font-style: italic;
@@ -168,8 +237,12 @@
             outline: none;
         }
 
+        .chat-input input:focus {
+            border-color: #166534;
+        }
+
         .chat-input button {
-            background: #4f46e5;
+            background: #166534;
             color: white;
             border: none;
             padding: 12px 20px;
@@ -179,12 +252,22 @@
         }
 
         .chat-input button:hover {
-            background: #4338ca;
+            background: #15803d;
         }
 
         .chat-input button:disabled {
-            background: #a5b4fc;
+            background: #86efac;
             cursor: not-allowed;
+        }
+
+        /* Scrollbar styling */
+        .quick-topics::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .quick-topics::-webkit-scrollbar-thumb {
+            background: #bbf7d0;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -192,27 +275,57 @@
 
     <!-- API Key Entry Screen -->
     <div id="apiKeyScreen">
-        <h2>🎓 AI Tutor</h2>
-        <p>Enter your Anthropic API key to get started. Your key is never saved and stays only in your browser tab.</p>
+        <h2>💼 Dropshipping CEO Advisor</h2>
+        <div class="persona-badge">
+            <strong>Marcus Rivera — Serial Dropshipping CEO</strong>
+            15+ years building 7-figure dropshipping empires. Expert in supplier negotiation,
+            product research, paid ads, automation, and scaling from $0 to $1M+.
+        </div>
+        <p>Enter your Anthropic API key to consult with the CEO. Your key stays only in this browser tab and is never saved.</p>
+        <div class="topics-grid">
+            <div class="topic-item">📦 Product Research</div>
+            <div class="topic-item">🏭 Supplier Sourcing</div>
+            <div class="topic-item">💰 Profit Margins</div>
+            <div class="topic-item">📣 Paid Advertising</div>
+            <div class="topic-item">🛒 Store Setup</div>
+            <div class="topic-item">🔄 Order Fulfillment</div>
+            <div class="topic-item">📈 Scaling Strategy</div>
+            <div class="topic-item">⚖️ Legal & Tax</div>
+        </div>
         <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." />
-        <span id="keyError">Please enter a valid API key.</span>
-        <button onclick="startChat()">Start Tutoring</button>
+        <span id="keyError">Please enter a valid API key (starts with sk-ant-).</span>
+        <button onclick="startChat()">Consult the CEO</button>
     </div>
 
     <!-- Chat Screen -->
     <div id="chatScreen">
         <div class="chat-container">
             <div class="chat-header">
-                <span>🎓 AI Tutor</span>
+                <div class="chat-header-info">
+                    <h1>💼 Marcus Rivera — Dropshipping CEO</h1>
+                    <p>7-Figure Dropshipping Expert • 15+ Years Experience • $50M+ in Sales</p>
+                </div>
                 <button onclick="changeKey()">Change Key</button>
             </div>
+            <div class="quick-topics">
+                <button class="quick-topic-btn" onclick="askQuick('How do I find winning products to dropship?')">🔍 Find Winning Products</button>
+                <button class="quick-topic-btn" onclick="askQuick('How do I find reliable suppliers on AliExpress vs Spocket?')">🏭 Find Suppliers</button>
+                <button class="quick-topic-btn" onclick="askQuick('What profit margins should I target in dropshipping?')">💰 Profit Margins</button>
+                <button class="quick-topic-btn" onclick="askQuick('How do I set up Facebook Ads for my dropshipping store?')">📣 Facebook Ads</button>
+                <button class="quick-topic-btn" onclick="askQuick('How do I scale my dropshipping business from $10k to $100k/month?')">📈 Scale Up</button>
+                <button class="quick-topic-btn" onclick="askQuick('What are the biggest mistakes new dropshippers make?')">⚠️ Avoid Mistakes</button>
+                <button class="quick-topic-btn" onclick="askQuick('How do I handle returns and customer complaints?')">🔄 Handle Returns</button>
+                <button class="quick-topic-btn" onclick="askQuick('What legal structure and taxes do I need for dropshipping?')">⚖️ Legal & Tax</button>
+            </div>
             <div class="chat-messages" id="messages">
-                <div class="message tutor">
-                    Hi! I'm your AI Tutor. What would you like to learn today?
+                <div class="message ceo">
+                    Hey — Marcus here. I've built and sold multiple 7-figure dropshipping businesses over the past 15 years, and I've seen every mistake in the book — and made most of them myself early on.<br><br>
+                    Whether you're just getting started, trying to find your first winning product, or ready to scale past $100k/month, I'm here to give you straight, no-BS advice based on what actually works in the real world.<br><br>
+                    What's your situation? Tell me where you're at and what you're trying to figure out.
                 </div>
             </div>
             <div class="chat-input">
-                <input type="text" id="userInput" placeholder="Ask me anything..." />
+                <input type="text" id="userInput" placeholder="Ask Marcus anything about dropshipping..." />
                 <button id="sendBtn" onclick="sendMessage()">Send</button>
             </div>
         </div>
@@ -221,6 +334,118 @@
     <script>
         let API_KEY = '';
         const conversationHistory = [];
+
+        const SYSTEM_PROMPT = `You are Marcus Rivera, a serial entrepreneur and CEO who has built multiple 7-figure dropshipping businesses over 15+ years. You've generated over $50M in total sales across various niches. You speak directly, practically, and from hard-won experience — not theory.
+
+## Your Background & Expertise
+
+**Business Track Record:**
+- Founded 6 dropshipping stores, 4 scaled to 7 figures, 2 sold for significant exits
+- Current portfolio generates $2M+/month across home goods, pet products, and fitness niches
+- Managed supplier relationships with 200+ factories in China, US, and Europe
+- Built and managed ad spend of $500k+/month across Meta, TikTok, and Google
+
+**Deep Knowledge Areas:**
+
+### Product Research & Selection
+- Use data tools: Minea, AdSpy, Dropispy, Sell The Trend, Google Trends, TikTok Creative Center
+- Winning product criteria: solves a problem, visual/demonstrable, not widely available locally, 3x-5x markup potential, under $50 impulse price point, lightweight for shipping
+- Avoid: seasonal fads, heavily patented items, fragile products, items with long shipping times from unreliable regions
+- Category sweet spots: home organization, beauty tools, pet accessories, fitness gadgets, baby products
+- Validate with: Facebook ad library (running 30+ days = profitable), Amazon BSR trends, AliExpress order counts
+
+### Supplier Sourcing & Relationships
+- AliExpress: best for testing, use ePacket/AliExpress Standard Shipping, target 4.8+ star suppliers with 500+ orders
+- Alibaba: for bulk once validated, negotiate MOQ, request samples always
+- Spocket: US/EU suppliers, faster shipping (3-7 days), higher cost but better for premium positioning
+- CJdropshipping: middle ground, warehousing options, faster shipping than raw AliExpress
+- Zendrop: strong US warehouse options, auto-fulfillment
+- Building direct supplier relationships: contact factory via WhatsApp after 3+ months of orders, negotiate pricing tiers at 100/500/1000 units
+- Red flags: no samples, vague shipping times, poor English communication, refuses video calls
+
+### Store Setup & Optimization
+- Platform: Shopify (industry standard), $39/month Basic is fine to start
+- Theme: Debutify or Dawn (free), avoid overloaded themes
+- Essential apps: DSers/AutoDS (fulfillment), Judge.me (reviews), Klaviyo (email), Vitals (all-in-one)
+- Critical pages: compelling product page with video, FAQ, 30-day return policy, About Us with trust signals
+- Trust builders: reviews with photos, SSL, payment badges, money-back guarantee, live chat
+- Conversion rate benchmark: 1-3% is normal, 3%+ is excellent
+
+### Pricing & Profit Margins
+- Minimum viable margin: 30% net after COGS, ads, Shopify fees, payment processing
+- Target gross margin: 60-70% (sell at 3-4x product cost)
+- Pricing formula: (Product cost × 3) + $5-10 for perceived value
+- Factor in: product cost + shipping + payment processing (2.9%+$0.30) + ad cost per acquisition + chargebacks (1-2%)
+- Break-even ROAS: 2.5-3x minimum; profitable target: 3.5x+
+- Free shipping threshold: offer free shipping over $50 to increase AOV
+
+### Paid Advertising
+**Facebook/Instagram (Meta):**
+- Start with $50-100/day testing budget
+- CBO (Campaign Budget Optimization) after finding winning ad sets
+- Creative is king: UGC-style video wins, hook in first 3 seconds, show the problem then solution
+- Testing structure: 1 campaign, 3-5 ad sets, 3 creatives each, broad or 1 interest per ad set
+- Kill ad sets spending 3x CPA with no purchase; scale winners by 20-30% every 2-3 days
+- Retargeting: 95% video viewers, website visitors, add-to-cart, initiate checkout
+
+**TikTok Ads:**
+- Lower CPMs than Meta currently, great for under-35 demographics
+- Spark Ads using organic TikTok content performs best
+- 15-30 second videos, native feel, no hard sell
+
+**Google Shopping:**
+- Best for branded or high-intent searches
+- Use Performance Max campaigns once you have purchase data
+- Strong for scaling proven products
+
+### Order Fulfillment & Operations
+- Use DSers or AutoDS for automated order fulfillment
+- Set customer expectations: 7-14 day shipping is acceptable with clear communication
+- Tracking: 17track or AfterShip for customer-facing tracking pages
+- Dispute rate: keep below 1% or PayPal/Stripe will terminate you
+- Chargeback protection: use Signifyd or Kount at scale
+- Build SOPs for your VA team: order processing, customer service, ad management
+
+### Customer Service & Returns
+- Response time target: under 2 hours during business hours
+- Use Gorgias or Freshdesk for ticketing
+- Return policy: 30-day, customer pays return shipping unless defective
+- Refund vs. reship: always offer reship first (cheaper), refund if they insist
+- Defective items: contact supplier for credit after 10+ defects, document everything
+
+### Scaling Strategy
+- $0-$1k/month: validate product, manual everything, learn the basics
+- $1k-$10k/month: automate fulfillment, start email flows, optimize conversion rate
+- $10k-$50k/month: hire VA for customer service, test new products systematically, build email list aggressively
+- $50k-$100k/month: dedicated media buyer, build creative team, negotiate supplier pricing, explore private label
+- $100k+/month: consider 3PL warehouse, build brand, explore wholesale, plan exit or raise capital
+- Key metric: track daily: Revenue, ROAS, CPA, LTV, Refund Rate, Email Revenue %
+
+### Legal, Tax & Business Structure
+- Form LLC immediately — protects personal assets, $50-500 depending on state
+- Get EIN from IRS (free, instant online)
+- Business bank account: Mercury (free, great for e-commerce)
+- Sales tax: use TaxJar or Avalara — nexus rules vary by state, don't ignore this
+- Income tax: set aside 25-30% of profits, pay quarterly estimated taxes
+- Supplier contracts: get written agreements on pricing, lead times, quality standards
+- Terms of Service and Privacy Policy: use Shopify's generator or Termly
+
+### Tools & Tech Stack
+- Research: Minea ($49/mo), AdSpy ($149/mo), Jungle Scout for Amazon validation
+- Store: Shopify + Vitals + Klaviyo + Judge.me + DSers
+- Analytics: Triple Whale or Northbeam for accurate attribution
+- Communication: Slack for team, Loom for SOPs
+- Accounting: QuickBooks or Wave
+
+## Communication Style
+- Direct and confident — you've seen it all and know what works
+- Use specific numbers and real examples from your experience
+- Call out common mistakes bluntly but constructively
+- Give actionable steps, not vague advice
+- Occasionally share a "war story" from your own business
+- Ask clarifying questions about their niche, budget, and stage to give tailored advice
+- Don't sugarcoat risks but always provide a path forward
+- Format responses clearly: use bullet points for lists, bold key terms, give specific recommendations not just options`;
 
         function startChat() {
             const keyInput = document.getElementById('apiKeyInput').value.trim();
@@ -236,10 +461,16 @@
 
         function changeKey() {
             API_KEY = '';
+            conversationHistory.length = 0;
             document.getElementById('apiKeyInput').value = '';
             document.getElementById('keyError').style.display = 'none';
             document.getElementById('chatScreen').style.display = 'none';
             document.getElementById('apiKeyScreen').style.display = 'flex';
+        }
+
+        function askQuick(question) {
+            document.getElementById('userInput').value = question;
+            sendMessage();
         }
 
         async function sendMessage() {
@@ -254,7 +485,7 @@
             input.value = '';
             sendBtn.disabled = true;
 
-            const loadingMsg = addMessage('Tutor is thinking...', 'loading');
+            const loadingMsg = addMessage('Marcus is thinking...', 'loading');
 
             conversationHistory.push({
                 role: 'user',
@@ -271,15 +502,9 @@
                         'anthropic-dangerous-direct-browser-access': 'true'
                     },
                     body: JSON.stringify({
-                        model: 'claude-haiku-4-5-20251001',
-                        max_tokens: 1000,
-                        system: `You are a friendly and patient AI tutor. Your job is to teach concepts clearly and simply.
-                        - Always explain things step by step
-                        - Use simple language and real world analogies
-                        - Ask the student questions to check understanding
-                        - Encourage the student when they get things right
-                        - If they are confused, try a different explanation approach
-                        - Keep responses concise and easy to read`,
+                        model: 'claude-opus-4-6',
+                        max_tokens: 1500,
+                        system: SYSTEM_PROMPT,
                         messages: conversationHistory
                     })
                 });
@@ -290,19 +515,19 @@
                     throw new Error(data.error?.message || `API error ${response.status}`);
                 }
 
-                const tutorReply = data.content[0].text;
+                const ceoReply = data.content[0].text;
 
                 loadingMsg.remove();
-                addMessage(tutorReply, 'tutor');
+                addMessage(ceoReply, 'ceo');
 
                 conversationHistory.push({
                     role: 'assistant',
-                    content: tutorReply
+                    content: ceoReply
                 });
 
             } catch (error) {
                 loadingMsg.remove();
-                addMessage(`Error: ${error.message}`, 'tutor');
+                addMessage(`Error: ${error.message}`, 'ceo');
             }
 
             sendBtn.disabled = false;
@@ -313,7 +538,7 @@
             const messages = document.getElementById('messages');
             const msg = document.createElement('div');
             msg.className = `message ${type}`;
-            msg.textContent = text;
+            msg.innerHTML = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             messages.appendChild(msg);
             messages.scrollTop = messages.scrollHeight;
             return msg;
